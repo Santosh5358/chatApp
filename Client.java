@@ -4,6 +4,9 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -26,15 +29,18 @@ public class Client extends JFrame {
     public Client(){
         try {
 
-            // System.out.println("sending request to server");
-            // socket=new Socket("127.0.0.1",7777);
-            // System.out.println("COnnection done");
+            System.out.println("sending request to server");
+            JFrame frame = new JFrame();
+            Object ip = JOptionPane.showInputDialog(frame, "Enter Your Ip Address :");
+            // Object portNo = JOptionPane.showInputDialog(frame, "Enter Your Ip Address :");
+            socket=new Socket((String) ip, 7777);
+            System.out.println("COnnection done");
 
-            // br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            // out =new PrintWriter(socket.getOutputStream());
+            br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out =new PrintWriter(socket.getOutputStream());
             createGUI();
             handleEvents();
-            // startReading();
+            startReading();
             // startWriting();
 
         } catch (Exception e) {
@@ -62,8 +68,9 @@ public class Client extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 // TODO Auto-generated method stub
-                String contentToSend=messageInput.getText();
                 if(e.getKeyCode()==10){
+                    String contentToSend=messageInput.getText();
+                    messagTextArea.append("Me : "+contentToSend+"\n");
                     out.println(contentToSend);
                     out.flush();
                     messageInput.setText("");
@@ -76,7 +83,7 @@ public class Client extends JFrame {
     }
     private void createGUI(){
         this.setTitle("Client Messager[End]");
-        this.setSize(600, 600);
+        this.setSize(600, 700);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
@@ -90,11 +97,12 @@ public class Client extends JFrame {
         messageInput.setHorizontalAlignment(SwingConstants.CENTER);
         heading.setHorizontalAlignment(SwingConstants.CENTER);
         heading.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
+        messagTextArea.setEditable(false);
 
         this.setLayout(new BorderLayout());
+        JScrollPane jScrollPane=new JScrollPane(messagTextArea);
         this.add(heading,BorderLayout.NORTH);
-        this.add(messagTextArea,BorderLayout.CENTER);
+        this.add(jScrollPane,BorderLayout.CENTER);
         this.add(messageInput,BorderLayout.SOUTH);
         this.setVisible(true);
     }
@@ -107,6 +115,8 @@ public class Client extends JFrame {
                     String msg= br.readLine();
                     if(msg.equals("exit")){
                          System.out.println("Server termined");
+                         JOptionPane.showMessageDialog(this, "Server Terminated the Chat");
+                         messageInput.enable(false);
                          socket.close();
                          break;
                     }
@@ -132,6 +142,8 @@ public class Client extends JFrame {
                     out.println(content);
                     out.flush();
                     if(content.equals("exit")){
+                        // JOptionPane.showMessageDialog(this, "Server Terminated the Chat");
+                         messageInput.enable(false);
                         socket.close();
                         break;
                     }
